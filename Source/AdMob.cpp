@@ -11,48 +11,57 @@
 #include "AdMob.h"
 #define QUOTE_STRING(str) #str
 
-#define STATIC_CALLBACK_IMPL(staticFunc, memberFunc) \
-void BannerAdCallbacks::staticFunc(const firebase::Future<void> &result, void *userData) \
+#define STATIC_CALLBACK_IMPL(dataType, staticFunc, memberFunc ) \
+void dataType::staticFunc(const firebase::Future<void> &result, void *userData) \
 { \
     if( result.status() == firebase::FutureStatus::kFutureStatusComplete && result.error() == 0 ) \
     {\
-        if( BannerAdCallbacks* bannerAdCallback = static_cast<BannerAdCallbacks*>(userData) )\
+        if( dataType* callback = static_cast<dataType*>(userData) )\
         {\
-            if( bannerAdCallback->memberFunc ) \
+            if( callback->memberFunc ) \
             { \
-                bannerAdCallback->memberFunc(result); \
+                callback->memberFunc(result); \
             } \
         } \
     } \
     else \
     { \
-        DBG( "BannerAdCallbacks::" << QUOTE_STRING(staticFunc) << " error: " << String(result.error_message() ) ); \
-        if( BannerAdCallbacks* bannerAdCallback =  static_cast<BannerAdCallbacks*>(userData) ) \
+        DBG( QUOTE_STRING(dataType) << "::" << QUOTE_STRING(staticFunc) << " error: " << String(result.error_message() ) ); \
+        if( dataType* callback =  static_cast<dataType*>(userData) ) \
         { \
-            if( bannerAdCallback->errorCallback )\
+            if( callback->errorCallback )\
             { \
-                bannerAdCallback->errorCallback(result); \
+                callback->errorCallback(result); \
             } \
         } \
     } \
 }
 
-#define STATIC_CALLBACK(a, b) STATIC_CALLBACK_IMPL(a, b);
+#define STATIC_CALLBACK( a, b, c ) STATIC_CALLBACK_IMPL( a, b, c )
+#define BANNER_STATIC_CALLBACK(b, c) STATIC_CALLBACK(BannerAdCallbacks, b, c)
+#define INTERSTITIAL_STATIC_CALLBACK(b, c) STATIC_CALLBACK(InterstitialAdCallbacks, b, c)
+
 #define MAKE_NAME(name) name##Callback
 
-STATIC_CALLBACK( MAKE_NAME(Init), MAKE_NAME(init) );
-STATIC_CALLBACK( MAKE_NAME(Load), MAKE_NAME(load) );
-STATIC_CALLBACK( MAKE_NAME(Hide), MAKE_NAME(hide) );
-STATIC_CALLBACK( MAKE_NAME(Show), MAKE_NAME(show) );
-STATIC_CALLBACK( MAKE_NAME(Pause), MAKE_NAME(pause) );
-STATIC_CALLBACK( MAKE_NAME(Resume), MAKE_NAME(resume) );
-STATIC_CALLBACK( MAKE_NAME(Destroy), MAKE_NAME(destroy) );
-STATIC_CALLBACK( MAKE_NAME(Move), MAKE_NAME(move) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Init), MAKE_NAME(init) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Load), MAKE_NAME(load) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Hide), MAKE_NAME(hide) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Show), MAKE_NAME(show) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Pause), MAKE_NAME(pause) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Resume), MAKE_NAME(resume) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Destroy), MAKE_NAME(destroy) );
+BANNER_STATIC_CALLBACK( MAKE_NAME(Move), MAKE_NAME(move) );
+
+INTERSTITIAL_STATIC_CALLBACK( MAKE_NAME(Init), MAKE_NAME(init) );
+INTERSTITIAL_STATIC_CALLBACK( MAKE_NAME(Load), MAKE_NAME(load) );
+INTERSTITIAL_STATIC_CALLBACK( MAKE_NAME(Show), MAKE_NAME(show) );
 
 #undef QUOTE_STRING
 #undef STATIC_CALLBACK_IMPL
-#undef MAKE_NAME
 #undef STATIC_CALLBACK
+#undef BANNER_STATIC_CALLBACK
+#undef INTERSTITIAL_STATIC_CALLBACK
+#undef MAKE_NAME
 
 BannerAd::BannerAd(StringRef adID,
                    int adDuration,
@@ -186,46 +195,6 @@ void BannerAd::OnPresentationStateChanged(firebase::admob::BannerView *banner_vi
     }
 }
 //==============================================================================
-#define QUOTE_STRING(str) #str
-
-#define STATIC_CALLBACK_IMPL(staticFunc, memberFunc) \
-void InterstitialAdCallbacks::staticFunc(const firebase::Future<void> &result, void *userData) \
-{ \
-    if( result.status() == firebase::FutureStatus::kFutureStatusComplete && result.error() == 0 ) \
-    {\
-        if( InterstitialAdCallbacks* interstitialAdCallback = static_cast<InterstitialAdCallbacks*>(userData) )\
-        {\
-            if( interstitialAdCallback->memberFunc ) \
-            { \
-                interstitialAdCallback->memberFunc(result); \
-            } \
-        } \
-    } \
-    else \
-    { \
-        DBG( "InterstitialAdCallbacks::" << QUOTE_STRING(staticFunc) << " error: " << String(result.error_message() ) ); \
-        if( InterstitialAdCallbacks* interstitialAdCallback =  static_cast<InterstitialAdCallbacks*>(userData) ) \
-        { \
-            if( interstitialAdCallback->errorCallback )\
-            { \
-                interstitialAdCallback->errorCallback(result); \
-            } \
-        } \
-    } \
-}
-
-#define STATIC_CALLBACK(a, b) STATIC_CALLBACK_IMPL(a, b);
-#define MAKE_NAME(name) name##Callback
-
-STATIC_CALLBACK( MAKE_NAME(Init), MAKE_NAME(init) );
-STATIC_CALLBACK( MAKE_NAME(Load), MAKE_NAME(load) );
-STATIC_CALLBACK( MAKE_NAME(Show), MAKE_NAME(show) );
-
-#undef QUOTE_STRING
-#undef STATIC_CALLBACK_IMPL
-#undef MAKE_NAME
-#undef STATIC_CALLBACK
-
 InterstitialAd::InterstitialAd(StringRef adID, int durationBetweenPopupsInSeconds, Component& owner) :
 interstitialAdUnitID(adID),
 duration(durationBetweenPopupsInSeconds)

@@ -14,10 +14,14 @@
 #include "firebase/admob/interstitial_ad.h"
 #include "firebase/admob/banner_view.h"
 
-struct BannerAdCallbacks
-{
 #define STATIC_CALLBACK_DECL(name) \
 static void name##Callback(const firebase::Future<void>& result, void* userData);
+
+#define FUNC_CALLBACK_DECL(name) \
+std::function<void(const firebase::Future<void>&)> name##Callback
+
+struct BannerAdCallbacks
+{
     STATIC_CALLBACK_DECL(Init);
     STATIC_CALLBACK_DECL(Load);
     STATIC_CALLBACK_DECL(Hide);
@@ -26,10 +30,7 @@ static void name##Callback(const firebase::Future<void>& result, void* userData)
     STATIC_CALLBACK_DECL(Resume);
     STATIC_CALLBACK_DECL(Destroy);
     STATIC_CALLBACK_DECL(Move);
-#undef STATIC_CALLBACK_DECL
     
-#define FUNC_CALLBACK_DECL(name) \
-std::function<void(const firebase::Future<void>&)> name##Callback
     FUNC_CALLBACK_DECL(init);
     FUNC_CALLBACK_DECL(load);
     FUNC_CALLBACK_DECL(hide);
@@ -39,7 +40,6 @@ std::function<void(const firebase::Future<void>&)> name##Callback
     FUNC_CALLBACK_DECL(destroy);
     FUNC_CALLBACK_DECL(move);
     FUNC_CALLBACK_DECL(error);
-#undef FUNC_CALLBACK_DECL
 };
 
 struct BannerAd :
@@ -84,20 +84,14 @@ private:
 //==============================================================================
 struct InterstitialAdCallbacks
 {
-#define STATIC_CALLBACK_DECL(name) \
-static void name##Callback(const firebase::Future<void>& result, void* userData);
     STATIC_CALLBACK_DECL(Init);
     STATIC_CALLBACK_DECL(Load);
     STATIC_CALLBACK_DECL(Show);
-#undef STATIC_CALLBACK_DECL
-    
-#define FUNC_CALLBACK_DECL(name) \
-std::function<void(const firebase::Future<void>&)> name##Callback
+
     FUNC_CALLBACK_DECL(init);
     FUNC_CALLBACK_DECL(load);
     FUNC_CALLBACK_DECL(show);
     FUNC_CALLBACK_DECL(error);
-#undef FUNC_CALLBACK_DECL
 };
 
 struct InterstitialAd :
@@ -123,6 +117,6 @@ private:
         SpawnAd
     };
 };
-
-
+#undef STATIC_CALLBACK_DECL
+#undef FUNC_CALLBACK_DECL
 #endif  // ADMOB_H_INCLUDED
