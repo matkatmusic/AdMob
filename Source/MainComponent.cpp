@@ -21,7 +21,7 @@ MainContentComponent::MainContentComponent()
 void MainContentComponent::timerCallback()
 {
     stopTimer();
-    StringRef bannerAdUnit = "ca-app-pub-1994573505631269/8531447869";
+    StringRef bannerAdUnit = "ca-app-pub-3940256099942544/2934735716"; //google test ad
     bannerAd.reset(new BannerAd(bannerAdUnit, 3, 4, true));
     addAndMakeVisible(bannerAd.get());
     addChangeListener(bannerAd.get());
